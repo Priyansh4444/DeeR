@@ -1,26 +1,24 @@
-import math
+import io
+from PyPDF2 import PdfReader
+from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import chromadb
+import uvicorn
+import logging
 import asyncio
 import cv2
 import numpy as np
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
-from fastapi.middleware.cors import CORSMiddleware
 from hume import AsyncHumeClient
 from hume.expression_measurement.stream import Config
 from hume.expression_measurement.stream.socket_client import StreamConnectOptions
 from hume.expression_measurement.stream.types import StreamFace
-import logging
-import uvicorn
-from chromadb.config import Settings
-from chromadb.utils import embedding_functions
-from chromadb import Client
-from sentence_transformers import SentenceTransformer
-from pydantic import BaseModel
+import math
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-# FastAPI app
 app = FastAPI()
 
 # Add CORS middleware
@@ -32,38 +30,78 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+# Initialize Chromadb client
+client = chromadb.PersistentClient(path="./chroma_db")
+
+# Get or create a collection for our documents
+collection = client.get_or_create_collection(name="documents")
+
 # List of emotions we're interested in
 RELEVANT_EMOTIONS = ['Calmness', 'Concentration', 'Distress']
 
-# Initialize Sentence Transformer model
-sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Create a custom embedding function
-
-
-class SentenceTransformerEmbeddingFunction(embedding_functions.EmbeddingFunction):
-    def __call__(self, texts):
-        return sentence_model.encode(texts).tolist()
+class QueryItem(BaseModel):
+    query: str
 
 
-# Initialize ChromaDB with the custom embedding function
-chroma_client = Client(Settings(
-    chroma_db_impl="duckdb+parquet",
-    persist_directory="./chroma_db"
-))
-
-embedding_func = SentenceTransformerEmbeddingFunction()
-
-collection = chroma_client.get_or_create_collection(
-    name="chat_history", embedding_function=embedding_func)
-
-
-class ChatMessage(BaseModel):
+class ContentItem(BaseModel):
     content: str
 
 
-class QueryMessage(BaseModel):
-    query: str
+@app.post("/add-to-chroma")
+async def add_to_chroma(item: ContentItem):
+    collection.add(
+        documents=[item.content],
+        ids=[f"doc_{collection.count() + 1}"]
+    )
+    return {"status": "success", "message": "Content added to Chromadb"}
+
+
+@app.post("/query-chroma")
+async def query_chroma(item: QueryItem):
+    results = collection.query(
+        query_texts=[item.query],
+        n_results=5
+    )
+    return {"results": results['documents'][0]}
+
+
+@app.post("/upload-file")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+
+        if file.filename.lower().endswith('.pdf'):
+            # Handle PDF files
+            pdf_reader = PdfReader(io.BytesIO(contents))
+            text_content = ""
+            for page in pdf_reader.pages:
+                text_content += page.extract_text() + "\n"
+        elif file.filename.lower().endswith(('.txt', '.md', '.py', '.js', '.html', '.css')):
+            # Handle text-based files
+            text_content = contents.decode('utf-8', errors='ignore')
+        else:
+            # For other file types, store file info or handle as needed
+            text_content = f"File uploaded: {file.filename} (binary file)"
+
+        # Add file content to Chromadb
+        collection.add(
+            documents=[text_content],
+            ids=[f"file_{collection.count() + 1}"]
+        )
+        return {"status": "success", "message": f"File {file.filename} uploaded and added to Chromadb"}
+    except Exception as e:
+        logging.error(f"Error uploading file: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 async def process_image_with_hume(image):
@@ -87,32 +125,6 @@ async def process_image_with_hume(image):
     except Exception as e:
         logging.error(f"Error processing image with Hume: {str(e)}")
         return {'error': str(e)}
-
-
-@app.post("/add-to-chroma")
-async def add_to_chroma(message: ChatMessage):
-    try:
-        collection.add(
-            documents=[message.content],
-            ids=[str(len(collection.get()['ids']) + 1)]
-        )
-        return {"message": "Content added to ChromaDB"}
-    except Exception as e:
-        logging.error(f"Error adding to ChromaDB: {str(e)}")
-        return {"error": "Internal server error"}
-
-
-@app.post("/query-chroma")
-async def query_chroma(query: QueryMessage):
-    try:
-        results = collection.query(
-            query_texts=[query.query],
-            n_results=5
-        )
-        return {"results": results['documents'][0]}
-    except Exception as e:
-        logging.error(f"Error querying ChromaDB: {str(e)}")
-        return {"error": "Internal server error"}
 
 
 @app.websocket("/ws")
@@ -196,4 +208,4 @@ def process_emotions(emotions):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8001)

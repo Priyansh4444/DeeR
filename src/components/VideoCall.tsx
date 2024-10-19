@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/VideoCall.tsx
 "use client";
 
 import dynamic from "next/dynamic";
-import PythonWebSocketClient from "./PythonWebSocketClient";
+// import PythonWebSocketClient from "./PythonWebSocketClient";
 import { useEffect, useState } from "react";
 import HyperbolicRAGComponent from "./RagUpload";
 
@@ -59,6 +60,7 @@ const DynamicVideoCall = dynamic(
       const { isLoading: isLoadingMic, localMicrophoneTrack } =
         useLocalMicrophoneTrack();
       const [frameData, setFrameData] = useState<ArrayBuffer | null>(null);
+
       const { isLoading: isLoadingCam, localCameraTrack } =
         useLocalCameraTrack();
       const remoteUsers = useRemoteUsers();
@@ -79,7 +81,6 @@ const DynamicVideoCall = dynamic(
         if (localCameraTrack) {
           const intervalId = setInterval(() => {
             const frame = localCameraTrack.getCurrentFrameData();
-            console.log("Frame data:", frame);
             setFrameData(frame.data.buffer as ArrayBuffer);
           }, 1000); // Capture frame every second
 
@@ -106,7 +107,7 @@ const DynamicVideoCall = dynamic(
                     : unit,
               }}
             >
-              <PythonWebSocketClient data={frameData} />
+              {/* <PythonWebSocketClient data={frameData} /> */}
               <HyperbolicRAGComponent />
               <LocalVideoTrack
                 track={localCameraTrack}

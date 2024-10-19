@@ -14,12 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Upload } from "lucide-react";
 
 const API_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcml5YW5zaHBva2Vtb25AZ21haWwuY29tIiwiaWF0IjoxNzI5Mjk3MDY0fQ.2F5jdRmnQ2RK3BEsU6u5dJYv9ukVAJpYN24pz4KCeYI";
 const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
-const BACKEND_URL = "http://localhost:3001"; // Update this to your backend URL
-
+const BACKEND_URL = "http://localhost:8001"; // Updated to use port 8001
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -29,8 +29,9 @@ const HyperbolicRAGComponent: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
@@ -156,6 +157,51 @@ const HyperbolicRAGComponent: React.FC = () => {
     }
   };
 
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/upload-file`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      console.log("File upload response:", response);
+      if (response) {
+        const result = await response.json();
+        console.log("File upload result:", result);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: `File "${file.name}" uploaded and processed successfully.`,
+          },
+        ]);
+      }
+      console.log(response);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Error uploading file: ${error}. Please try again.`,
+        },
+      ]);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <Card className="fixed z-10 bottom-4 right-4 w-96 h-96 flex flex-col">
       <CardHeader className="font-bold text-lg">Hyperbolic RAG Chat</CardHeader>
@@ -180,19 +226,37 @@ const HyperbolicRAGComponent: React.FC = () => {
             </div>
           ))}
           {isLoading && <div className="text-center">Loading...</div>}
+          {isUploading && <div className="text-center">Uploading file...</div>}
         </ScrollArea>
       </CardContent>
-      <CardFooter>
-        <Input
-          value={input}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Type your message..."
-          className="flex-grow mr-2"
-        />
-        <Button onClick={sendMessage} disabled={isLoading}>
-          Send
-        </Button>
+      <CardFooter className="flex-col gap-2">
+        <div className="flex w-full">
+          <Input
+            value={input}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            className="flex-grow mr-2"
+          />
+          <Button onClick={sendMessage} disabled={isLoading}>
+            Send
+          </Button>
+        </div>
+        <div className="flex w-full">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="w-full"
+          >
+            <Upload className="mr-2 h-4 w-4" /> Upload File
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
