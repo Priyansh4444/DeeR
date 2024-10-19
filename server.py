@@ -6,7 +6,6 @@ from pydantic import BaseModel
 import chromadb
 import uvicorn
 import logging
-import asyncio
 import cv2
 import numpy as np
 from hume import AsyncHumeClient
@@ -14,6 +13,11 @@ from hume.expression_measurement.stream import Config
 from hume.expression_measurement.stream.socket_client import StreamConnectOptions
 from hume.expression_measurement.stream.types import StreamFace
 import math
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+HUME_API_KEY = os.getenv("HUME_API_KEY")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -108,8 +112,9 @@ async def process_image_with_hume(image):
     logging.info("Processing image with Hume...")
     try:
         # Initialize Hume client
+
         client = AsyncHumeClient(
-            api_key="AQzwr7sj6DwoRBRxHWaqs93VfY6vp1Z1X2GneqL3kaJrTxZ6")
+            api_key=HUME_API_KEY)
         model_config = Config(face=StreamFace())
         stream_options = StreamConnectOptions(config=model_config)
 

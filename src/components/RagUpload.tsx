@@ -83,6 +83,7 @@ const HyperbolicRAGComponent: React.FC = () => {
       // Add user input to ChromaDB
       await addToChromaDB(input);
 
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
