@@ -32,7 +32,10 @@ const HyperbolicRAGComponent: React.FC = () => {
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'assistant' && lastMessage.content !== lastMessageRef.current) {
+      if (
+        lastMessage.role === "assistant" &&
+        lastMessage.content !== lastMessageRef.current
+      ) {
         playAudioMessage(lastMessage.content);
         lastMessageRef.current = lastMessage.content;
       }
