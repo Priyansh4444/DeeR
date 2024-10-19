@@ -26,7 +26,7 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
   const lastProcessedTime = useRef<number>(0);
 
   useEffect(() => {
-    const ws = new ReconnectingWebSocket("ws://localhost:8000/ws");
+    const ws = new ReconnectingWebSocket("ws://localhost:8001/ws");
     ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
@@ -77,7 +77,7 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
     if (
       websocketRef.current &&
       data &&
-      currentTime - lastProcessedTime.current > 1000
+      currentTime - lastProcessedTime.current > 200
     ) {
       setIsProcessing(true);
       websocketRef.current.send(data);
@@ -86,7 +86,7 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
   }, [data]);
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 p-4 rounded-lg shadow-lg z-50 max-w-md w-full">
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-lg z-50 max-w-md w-full">
       <h2 className="text-xl font-bold mb-4">Emotion Analysis</h2>
       {isProcessing && (
         <div className="absolute top-0 right-0 mt-2 mr-2">

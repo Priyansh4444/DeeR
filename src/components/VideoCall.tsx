@@ -3,7 +3,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-// import PythonWebSocketClient from "./PythonWebSocketClient";
+import PythonWebSocketClient from "./PythonWebSocketClient";
 import { useEffect, useState } from "react";
 import HyperbolicRAGComponent from "./RagUpload";
 
@@ -107,7 +107,7 @@ const DynamicVideoCall = dynamic(
                     : unit,
               }}
             >
-              {/* <PythonWebSocketClient data={frameData} /> */}
+              <PythonWebSocketClient data={frameData} />
               <HyperbolicRAGComponent />
               <LocalVideoTrack
                 track={localCameraTrack}

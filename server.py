@@ -181,9 +181,9 @@ def process_emotions(emotions):
 
     # Apply corrections to account for model bias
     corrections = {
-        'Calmness': 0.7,  # Reduce calmness
-        'Concentration': 0.8,  # Slightly reduce concentration
-        'Distress': 1.5  # Increase distress
+        'Calmness': 0.1,  # Reduce calmness
+        'Concentration': 0.1,  # Slightly reduce concentration
+        'Distress': 0.1  # Increase distress
     }
 
     corrected_emotions = {

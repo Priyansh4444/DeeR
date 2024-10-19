@@ -126,10 +126,12 @@ const HyperbolicRAGComponent: React.FC = () => {
                 const jsonData = JSON.parse(jsonString);
                 const content = jsonData.choices[0]?.delta?.content || "";
                 assistantMessage.content += content;
-                setMessages((prev) => [
-                  ...prev,
-                  { ...assistantMessage },
-                ]);
+                setMessages((prev) => {
+                  if (prev[prev.length - 1]?.role === "assistant") {
+                    return [...prev.slice(0, -1), { ...assistantMessage }];
+                  }
+                  return [...prev, { ...assistantMessage }];
+                });
               } catch (error) {
                 console.error("Error parsing JSON:", error);
               }
