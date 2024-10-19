@@ -1,7 +1,7 @@
 # ToDo
 
 - [X] Websocket Streaming of Audio
-- [ ] Add STT
+- [X] Add STT
 - [ ] Makie it interruptable!
 - [ ] Adding Timer Functionality
 - [ ] Adding feature of at the end of the timer being able to explain like richard feynman and get review

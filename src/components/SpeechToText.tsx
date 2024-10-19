@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   createClient,
   LiveTranscriptionEvents,
-  LiveClient,
 } from "@deepgram/sdk";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Play } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 
 const SpeechToText: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -68,6 +67,8 @@ const SpeechToText: React.FC = () => {
         model: "nova-2",
         language: "en-US",
         smart_format: true,
+        filler_words: true,
+        punctuate: true,
       });
 
       connection.addListener(LiveTranscriptionEvents.Open, () => {
@@ -110,6 +111,13 @@ const SpeechToText: React.FC = () => {
     }
   }, [audioFile]);
 
+  // Auto-transcribe when recording ends
+  useEffect(() => {
+    if (!isRecording && audioFile) {
+      streamToDeepgram();
+    }
+  }, [isRecording, audioFile, streamToDeepgram]);
+
   return (
     <div className="absolute bg-white z-20 bottom-10 left-10 h-[50vh] w-[30vw] p-4 overflow-auto">
       <h1 className="text-2xl font-bold mb-4">
@@ -119,13 +127,6 @@ const SpeechToText: React.FC = () => {
         <Button onClick={isRecording ? stopRecording : startRecording}>
           {isRecording ? <MicOff className="mr-2" /> : <Mic className="mr-2" />}
           {isRecording ? "Stop Recording" : "Start Recording"}
-        </Button>
-        <Button
-          onClick={streamToDeepgram}
-          disabled={!audioFile || isTranscribing}
-        >
-          <Play className="mr-2" />
-          Transcribe
         </Button>
       </div>
       {error && <p className="text-red-500 mb-2">Error: {error}</p>}
