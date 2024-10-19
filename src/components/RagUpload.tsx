@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, KeyboardEvent, ChangeEvent } from "react";
+import React, { useRef, KeyboardEvent, ChangeEvent, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload } from "lucide-react";
 import { useMessages } from "./useMessages";
-import { handleFileUpload } from "./api";
+import { handleFileUpload, playAudioMessage } from "./api";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {
@@ -27,6 +27,17 @@ const HyperbolicRAGComponent: React.FC = () => {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const lastMessageRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant' && lastMessage.content !== lastMessageRef.current) {
+        playAudioMessage(lastMessage.content);
+        lastMessageRef.current = lastMessage.content;
+      }
+    }
+  }, [isLoading, messages]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);

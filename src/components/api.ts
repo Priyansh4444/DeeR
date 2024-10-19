@@ -1,7 +1,13 @@
 import { Message } from "./types";
+import Cartesia, { WebPlayer } from "@cartesia/cartesia-js";
 
 const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
 const BACKEND_URL = "http://localhost:8001";
+const CARTESIA_API_KEY =
+  process.env.NEXT_PUBLIC_CARTESIA_API_KEY || "your-cartesia-api-key";
+
+const cartesia = new Cartesia({ apiKey: CARTESIA_API_KEY });
+const player = new WebPlayer({ bufferDuration: 0.5 });
 
 export const addToChromaDB = async (content: string) => {
   try {
@@ -86,4 +92,28 @@ export const handleFileUpload = async (file: File) => {
   }
 
   return await response.json();
+};
+
+export const playAudioMessage = async (text: string) => {
+  const websocket = cartesia.tts.websocket({
+    container: "raw",
+    encoding: "pcm_f32le",
+    sampleRate: 44100,
+  });
+
+  try {
+    await websocket.connect();
+    const response = await websocket.send({
+      model_id: "sonic-english",
+      voice: {
+        mode: "id",
+        id: "a0e99841-438c-4a64-b679-ae501e7d6091", // You can change this to a different voice ID if desired
+      },
+      transcript: text,
+    });
+
+    await player.play(response.source);
+  } catch (error) {
+    console.error("Error playing audio:", error);
+  }
 };
