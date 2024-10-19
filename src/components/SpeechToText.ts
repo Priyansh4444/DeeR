@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
@@ -15,29 +13,40 @@ export const useSpeechToText = (
   const chunksRef = useRef<Blob[]>([]);
   const transcriptBufferRef = useRef<string>("");
 
+  const clearAllState = useCallback(() => {
+    setTranscript("");
+    setError(null);
+    setAudioFile(null);
+    transcriptBufferRef.current = "";
+    chunksRef.current = [];
+  }, []);
+
   const startRecording = useCallback(async () => {
+    clearAllState();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
+
       mediaRecorder.addEventListener("dataavailable", (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
       });
+
       mediaRecorder.addEventListener("stop", () => {
+        stream.getTracks().forEach((track) => track.stop());
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
         setAudioFile(audioBlob);
       });
+
       mediaRecorder.start();
       setIsRecording(true);
-      setError(null);
     } catch (err: any) {
       console.error(err);
       setError(err.message);
     }
-  }, []);
+  }, [clearAllState]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current) {
@@ -52,8 +61,9 @@ export const useSpeechToText = (
       return;
     }
     setIsTranscribing(true);
-    setTranscript("");
     transcriptBufferRef.current = "";
+    setTranscript("");
+
     try {
       const deepgram = createClient(process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY!);
       const connection = deepgram.listen.live({
@@ -81,8 +91,8 @@ export const useSpeechToText = (
 
       connection.addListener(LiveTranscriptionEvents.Transcript, (data) => {
         const newTranscript = data.channel.alternatives[0].transcript;
-        transcriptBufferRef.current += " " + newTranscript;
-        setTranscript(transcriptBufferRef.current);
+        transcriptBufferRef.current += newTranscript + " ";
+        setTranscript(transcriptBufferRef.current.trim());
       });
 
       connection.addListener(LiveTranscriptionEvents.Error, (err) => {
@@ -93,19 +103,17 @@ export const useSpeechToText = (
       connection.addListener(LiveTranscriptionEvents.Close, () => {
         console.log("Connection closed.");
         setIsTranscribing(false);
-
-        // Once the transcription ends, send the entire transcript
         if (transcriptBufferRef.current.trim()) {
           onNewTranscript(transcriptBufferRef.current.trim());
-          transcriptBufferRef.current = "";
         }
+        clearAllState();
       });
     } catch (err: any) {
       console.error(err);
       setError(err.message);
       setIsTranscribing(false);
     }
-  }, [audioFile, onNewTranscript]);
+  }, [audioFile, onNewTranscript, clearAllState]);
 
   useEffect(() => {
     if (!isRecording && audioFile) {

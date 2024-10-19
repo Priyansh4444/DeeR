@@ -43,10 +43,15 @@ const HyperbolicRAGComponent: React.FC = () => {
 
   const handleNewTranscript = useCallback(
     (newTranscript: string) => {
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: newTranscript },
-      ]);
+      setMessages((prev) => {
+        if (
+          prev.some((msg) => msg.content === newTranscript) ||
+          (prev.length > 0 && prev[prev.length - 1].role === "user")
+        ) {
+          return prev;
+        }
+        return [...prev, { role: "user", content: newTranscript }];
+      });
       setInput(newTranscript);
       setShouldSendTranscript(true);
     },
@@ -222,7 +227,7 @@ const HyperbolicRAGComponent: React.FC = () => {
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="p-2 ml-2"
+            className="p-2"
           >
             <Upload />
           </Button>
