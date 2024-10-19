@@ -17,11 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowRightSquareIcon, Mic, MicOff, Upload } from "lucide-react";
-import { useMessages } from "./useMessages";
-import { handleFileUpload } from "./api";
+import { useMessages } from "@/hooks/useMessages";
+import { handleFileUpload } from "@/hooks/api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
 import { fetchAccessToken } from "hume";
-import { useSpeechToText } from "./SpeechToText";
+import { useSpeechToText } from "@/hooks/SpeechToText";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {

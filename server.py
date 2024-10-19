@@ -13,6 +13,7 @@ from hume.expression_measurement.stream import Config
 from hume.expression_measurement.stream.socket_client import StreamConnectOptions
 from hume.expression_measurement.stream.types import StreamFace
 import math
+from perplexity import multi_model_learning_chain
 
 from dotenv import load_dotenv
 import os
@@ -210,6 +211,24 @@ def process_emotions(emotions):
         }
         return [{"name": name, "score": score} for name, score in normalized_emotions.items()]
     return []
+
+
+@app.post("/generate-summary")
+async def generate_summary(item: QueryItem):
+    try:
+        results = collection.query(
+            query_texts=[item.query],
+            n_results=5
+        )
+        if results['documents']:
+            content = results['documents'][0] + " " + item.query
+            summary = multi_model_learning_chain(content)
+            return {"status": "success", "summary": summary}
+        else:
+            return {"status": "error", "message": "No results found"}
+    except Exception as e:
+        logging.error(f"Error generating summary: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 if __name__ == "__main__":

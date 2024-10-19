@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Message } from "./types";
 import { sendMessageToAPI, addToChromaDB, playAudioMessage } from "./api";
-import { useGlobalState } from "./GlobalContext";
+import { useGlobalState } from "../components/GlobalContext";
 
 export const useMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
