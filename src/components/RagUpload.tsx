@@ -127,7 +127,7 @@ const HyperbolicRAGComponent: React.FC = () => {
                 const content = jsonData.choices[0]?.delta?.content || "";
                 assistantMessage.content += content;
                 setMessages((prev) => [
-                  ...prev.slice(0, -1),
+                  ...prev,
                   { ...assistantMessage },
                 ]);
               } catch (error) {
