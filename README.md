@@ -1,6 +1,6 @@
 # ToDo
 
-- [ ] Websocket Streaming of Audio
+- [X] Websocket Streaming of Audio
 - [ ] Add STT
 - [ ] Makie it interruptable!
 - [ ] Adding Timer Functionality
