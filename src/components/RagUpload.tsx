@@ -1,3 +1,4 @@
+"use client";
 import React, {
   useState,
   useEffect,
@@ -16,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload } from "lucide-react";
 
-const API_KEY = process.env.HYPERBOLIC_API_KEY;
 const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
 const BACKEND_URL = "http://localhost:8001"; // Updated to use port 8001
 interface Message {
@@ -81,7 +81,9 @@ const HyperbolicRAGComponent: React.FC = () => {
 
       // Add user input to ChromaDB
       await addToChromaDB(input);
-
+      const API_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcml5YW5zaHBva2Vtb25AZ21haWwuY29tIiwiaWF0IjoxNzI5Mjk3MDY0fQ.2F5jdRmnQ2RK3BEsU6u5dJYv9ukVAJpYN24pz4KCeYI";
+      console.log("API_KEY:", API_KEY);
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
