@@ -2,13 +2,19 @@ import math
 import asyncio
 import cv2
 import numpy as np
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.middleware.cors import CORSMiddleware
 from hume import AsyncHumeClient
 from hume.expression_measurement.stream import Config
 from hume.expression_measurement.stream.socket_client import StreamConnectOptions
 from hume.expression_measurement.stream.types import StreamFace
 import logging
 import uvicorn
+from chromadb.config import Settings
+from chromadb.utils import embedding_functions
+from chromadb import Client
+from sentence_transformers import SentenceTransformer
+from pydantic import BaseModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -17,8 +23,47 @@ logging.basicConfig(level=logging.INFO,
 # FastAPI app
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 # List of emotions we're interested in
 RELEVANT_EMOTIONS = ['Calmness', 'Concentration', 'Distress']
+
+# Initialize Sentence Transformer model
+sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Create a custom embedding function
+
+
+class SentenceTransformerEmbeddingFunction(embedding_functions.EmbeddingFunction):
+    def __call__(self, texts):
+        return sentence_model.encode(texts).tolist()
+
+
+# Initialize ChromaDB with the custom embedding function
+chroma_client = Client(Settings(
+    chroma_db_impl="duckdb+parquet",
+    persist_directory="./chroma_db"
+))
+
+embedding_func = SentenceTransformerEmbeddingFunction()
+
+collection = chroma_client.get_or_create_collection(
+    name="chat_history", embedding_function=embedding_func)
+
+
+class ChatMessage(BaseModel):
+    content: str
+
+
+class QueryMessage(BaseModel):
+    query: str
 
 
 async def process_image_with_hume(image):
@@ -42,6 +87,32 @@ async def process_image_with_hume(image):
     except Exception as e:
         logging.error(f"Error processing image with Hume: {str(e)}")
         return {'error': str(e)}
+
+
+@app.post("/add-to-chroma")
+async def add_to_chroma(message: ChatMessage):
+    try:
+        collection.add(
+            documents=[message.content],
+            ids=[str(len(collection.get()['ids']) + 1)]
+        )
+        return {"message": "Content added to ChromaDB"}
+    except Exception as e:
+        logging.error(f"Error adding to ChromaDB: {str(e)}")
+        return {"error": "Internal server error"}
+
+
+@app.post("/query-chroma")
+async def query_chroma(query: QueryMessage):
+    try:
+        results = collection.query(
+            query_texts=[query.query],
+            n_results=5
+        )
+        return {"results": results['documents'][0]}
+    except Exception as e:
+        logging.error(f"Error querying ChromaDB: {str(e)}")
+        return {"error": "Internal server error"}
 
 
 @app.websocket("/ws")
