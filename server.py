@@ -17,7 +17,7 @@ import math
 from dotenv import load_dotenv
 import os
 load_dotenv()
-HUME_API_KEY = os.getenv("HUME_API_KEY")
+HUME_API_KEY = os.getenv("NEXT_PUBLIC_HUME_API_KEY")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,

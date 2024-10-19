@@ -1,4 +1,12 @@
-import React, { useRef, KeyboardEvent, ChangeEvent } from "react";
+"use client";
+import React, {
+  useRef,
+  KeyboardEvent,
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   Card,
   CardContent,
@@ -11,6 +19,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload } from "lucide-react";
 import { useMessages } from "./useMessages";
 import { handleFileUpload } from "./api";
+import { HumeVoiceComponent } from "./HumeVoiceComponent";
+import { fetchAccessToken } from "hume";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {
@@ -24,8 +34,33 @@ const HyperbolicRAGComponent: React.FC = () => {
     setMessages,
   } = useMessages();
 
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const getAccessToken = async () => {
+      try {
+        const token = await fetchAccessToken({
+          apiKey: String(process.env.NEXT_PUBLIC_HUME_API_KEY),
+          secretKey: String(process.env.NEXT_PUBLIC_HUME_SECRET_KEY),
+        });
+        setAccessToken(token);
+      } catch (error) {
+        console.error("Failed to fetch access token:", error);
+      }
+    };
+
+    getAccessToken();
+  }, []);
+
+  const handleNewVoiceMessage = useCallback(
+    (newMessage: { role: string; content: string }) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    },
+    [setMessages]
+  );
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -116,6 +151,12 @@ const HyperbolicRAGComponent: React.FC = () => {
           <Button onClick={sendMessage} disabled={isLoading}>
             Send
           </Button>
+          {accessToken && (
+            <HumeVoiceComponent
+              accessToken={accessToken}
+              onNewMessage={handleNewVoiceMessage}
+            />
+          )}
         </div>
         <div className="flex w-full">
           <input

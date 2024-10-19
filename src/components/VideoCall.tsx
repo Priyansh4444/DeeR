@@ -60,7 +60,6 @@ const DynamicVideoCall = dynamic(
       const { isLoading: isLoadingMic, localMicrophoneTrack } =
         useLocalMicrophoneTrack();
       const [frameData, setFrameData] = useState<ArrayBuffer | null>(null);
-
       const { isLoading: isLoadingCam, localCameraTrack } =
         useLocalCameraTrack();
       const remoteUsers = useRemoteUsers();
@@ -107,7 +106,7 @@ const DynamicVideoCall = dynamic(
                     : unit,
               }}
             >
-              <PythonWebSocketClient data={frameData} />
+              {/* <PythonWebSocketClient data={frameData} /> */}
               <HyperbolicRAGComponent />
               <LocalVideoTrack
                 track={localCameraTrack}
