@@ -206,7 +206,7 @@ def process_emotions(emotions):
 
     if total > 0:
         normalized_emotions = {
-            name: score / total for name, score in exaggerated_emotions.items()
+            name: (score / total) * 100 for name, score in exaggerated_emotions.items()
         }
         return [{"name": name, "score": score} for name, score in normalized_emotions.items()]
     return []
