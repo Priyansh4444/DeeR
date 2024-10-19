@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Message } from "./types";
-import { sendMessageToAPI, addToChromaDB } from "./api";
+import { sendMessageToAPI, addToChromaDB, playAudioMessage } from "./api";
 
 export const useMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -8,7 +8,7 @@ export const useMessages = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!input.trim()) return;
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -18,7 +18,7 @@ export const useMessages = () => {
     try {
       const response = await sendMessageToAPI(messages, input);
       const reader = response.body?.getReader();
-      const assistantMessage: Message = { role: "assistant", content: "" };
+      let assistantMessage: Message = { role: "assistant", content: "" };
 
       if (reader) {
         while (true) {
@@ -37,12 +37,6 @@ export const useMessages = () => {
                 const jsonData = JSON.parse(jsonString);
                 const content = jsonData.choices[0]?.delta?.content || "";
                 assistantMessage.content += content;
-                setMessages((prev) => {
-                  if (prev[prev.length - 1]?.role === "assistant") {
-                    return [...prev.slice(0, -1), { ...assistantMessage }];
-                  }
-                  return [...prev, { ...assistantMessage }];
-                });
               } catch (error) {
                 console.error("Error parsing JSON:", error);
               }
@@ -52,12 +46,14 @@ export const useMessages = () => {
       }
 
       await addToChromaDB(assistantMessage.content);
+      setMessages((prev) => [...prev, assistantMessage]);
+      playAudioMessage(assistantMessage.content);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, messages]);
 
   return {
     messages,
