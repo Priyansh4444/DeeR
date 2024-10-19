@@ -21,6 +21,7 @@ import { useMessages } from "./useMessages";
 import { handleFileUpload } from "./api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
 import { fetchAccessToken } from "hume";
+import SpeechToText from "./SpeechToText";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {
@@ -163,9 +164,6 @@ const HyperbolicRAGComponent: React.FC = () => {
             disabled={isLoading}
           >
             <ArrowRightSquareIcon />
-          </Button>
-          <Button className="p-3" onClick={sendMessage} disabled={isLoading}>
-            <Mic />
           </Button>
           {accessToken && (
             <HumeVoiceComponent
