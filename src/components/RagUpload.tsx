@@ -1,12 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  KeyboardEvent,
-  ChangeEvent,
-} from "react";
+import React, { useRef, KeyboardEvent, ChangeEvent } from "react";
 import {
   Card,
   CardContent,
@@ -16,143 +9,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, Volume2, VolumeX } from "lucide-react";
-import Cartesia, { WebPlayer } from "@cartesia/cartesia-js";
-
-const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
-const BACKEND_URL = "http://localhost:8001"; // Updated to use port 8001
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+import { Upload } from "lucide-react";
+import { useMessages } from "./useMessages";
+import { handleFileUpload } from "./api";
 
 const HyperbolicRAGComponent: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const {
+    messages,
+    input,
+    isLoading,
+    isUploading,
+    setInput,
+    setIsUploading,
+    sendMessage,
+    setMessages,
+  } = useMessages();
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const addToChromaDB = async (content: string) => {
-    try {
-      await fetch(`${BACKEND_URL}/add-to-chroma`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content }),
-      });
-    } catch (error) {
-      console.error("Error adding to ChromaDB:", error);
-    }
-  };
-
-  const getRelevantContext = async (query: string) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/query-chroma`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
-      const data = await response.json();
-      return data.results;
-    } catch (error) {
-      console.error("Error querying ChromaDB:", error);
-      return [];
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      // Get relevant context from ChromaDB
-      const relevantContext = await getRelevantContext(input);
-
-      // Add user input to ChromaDB
-      await addToChromaDB(input);
-      const API_KEY = process.env.NEXT_PUBLIC_HYPERBOLIC_API_KEY;
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "system",
-              content: `Relevant context: ${relevantContext.join(
-                ". "
-              )} Your Role: You are a professional Teacher Who loves the Richard Feynman Method of learning!
-          You will be informed on what to do later on,
-          till then just help the user out with learning whatever he asks you!`,
-            },
-            ...messages,
-            userMessage,
-          ],
-          model: "meta-llama/Meta-Llama-3.1-405B-Instruct",
-          max_tokens: 2048,
-          temperature: 0.7,
-          top_p: 0.9,
-          stream: true,
-        }),
-      });
-
-      const reader = response.body?.getReader();
-      const assistantMessage: Message = { role: "assistant", content: "" };
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = new TextDecoder().decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const jsonString = line.slice(6);
-              if (jsonString.trim() === "[DONE]") break;
-
-              try {
-                const jsonData = JSON.parse(jsonString);
-                const content = jsonData.choices[0]?.delta?.content || "";
-                assistantMessage.content += content;
-                setMessages((prev) => {
-                  if (prev[prev.length - 1]?.role === "assistant") {
-                    return [...prev.slice(0, -1), { ...assistantMessage }];
-                  }
-                  return [...prev, { ...assistantMessage }];
-                });
-              } catch (error) {
-                console.error("Error parsing JSON:", error);
-              }
-            }
-          }
-        }
-      }
-
-      // Add assistant's response to ChromaDB
-      await addToChromaDB(assistantMessage.content);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -164,37 +38,20 @@ const HyperbolicRAGComponent: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await fetch(`${BACKEND_URL}/upload-file`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json",
+      const result = await handleFileUpload(file);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `File "${file.name}" uploaded and processed successfully.`,
         },
-      });
-      console.log("File upload response:", response);
-      if (response) {
-        const result = await response.json();
-        console.log("File upload result:", result);
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: `File "${file.name}" uploaded and processed successfully.`,
-          },
-        ]);
-      }
-      console.log(response);
+      ]);
     } catch (error) {
       console.error("Error uploading file:", error);
       setMessages((prev) => [
@@ -253,7 +110,7 @@ const HyperbolicRAGComponent: React.FC = () => {
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleFileUpload}
+            onChange={onFileUpload}
             className="hidden"
           />
           <Button
