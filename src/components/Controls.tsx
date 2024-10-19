@@ -2,7 +2,7 @@
 "use client";
 import { useVoice, VoiceReadyState } from "@humeai/voice-react";
 import { Button } from "./ui/button";
-import { FireExtinguisher, FlameKindling, Mic, MicOff } from "lucide-react";
+import { FireExtinguisher, FlameKindling } from "lucide-react";
 export default function Controls() {
   const { connect, disconnect, readyState } = useVoice();
 
