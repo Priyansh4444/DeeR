@@ -19,7 +19,7 @@ const VoiceMessagesHandler: React.FC<{ onNewMessage: (message: { role: string; c
             if (msg.type === "user_message" || msg.type === "assistant_message") {
                 onNewMessage({
                     role: msg.message.role,
-                    content: msg.message.content,
+                    content: msg.message.content!,
                 });
             }
         });

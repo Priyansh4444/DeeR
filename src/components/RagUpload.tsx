@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload } from "lucide-react";
+import { ArrowRightSquareIcon, Mic, Upload } from "lucide-react";
 import { useMessages } from "./useMessages";
 import { handleFileUpload } from "./api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
@@ -56,8 +56,17 @@ const HyperbolicRAGComponent: React.FC = () => {
   }, []);
 
   const handleNewVoiceMessage = useCallback(
-    (newMessage: { role: string; content: string }) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    (newMessage: { role: "user" | "assistant"; content: string }) => {
+      console.log("New voice message:", newMessage);
+
+      setMessages((prevMessages) => {
+        for (const msg of prevMessages) {
+          if (msg.content === newMessage.content) {
+            return prevMessages;
+          }
+        }
+        return [...prevMessages, newMessage];
+      });
     },
     [setMessages]
   );
@@ -78,7 +87,7 @@ const HyperbolicRAGComponent: React.FC = () => {
 
     setIsUploading(true);
     try {
-      const result = await handleFileUpload(file);
+      await handleFileUpload(file);
       setMessages((prev) => [
         ...prev,
         {
@@ -101,7 +110,7 @@ const HyperbolicRAGComponent: React.FC = () => {
   };
 
   return (
-    <Card className="fixed z-10 top-4 right-4 w-96 h-[80vh] flex flex-col">
+    <Card className="fixed z-10 top-4 right-4 w-[26rem] h-[80vh] flex flex-col">
       <CardHeader className="font-bold text-lg">Hyperbolic RAG Chat</CardHeader>
       <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
@@ -148,8 +157,15 @@ const HyperbolicRAGComponent: React.FC = () => {
             placeholder="Type your message..."
             className="flex-grow mr-2"
           />
-          <Button onClick={sendMessage} disabled={isLoading}>
-            Send
+          <Button
+            className="mx-2 p-3"
+            onClick={sendMessage}
+            disabled={isLoading}
+          >
+            <ArrowRightSquareIcon />
+          </Button>
+          <Button className="p-3" onClick={sendMessage} disabled={isLoading}>
+            <Mic />
           </Button>
           {accessToken && (
             <HumeVoiceComponent
