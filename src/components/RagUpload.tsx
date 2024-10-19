@@ -33,13 +33,25 @@ const HyperbolicRAGComponent: React.FC = () => {
     setIsUploading,
     sendMessage,
     setMessages,
+    clearInput,
   } = useMessages();
-
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [shouldSendTranscript, setShouldSendTranscript] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleNewTranscript = useCallback(
+    (newTranscript: string) => {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: newTranscript },
+      ]);
+      setInput(newTranscript);
+      setShouldSendTranscript(true);
+    },
+    [setMessages, setInput]
+  );
 
   const {
     isRecording,
@@ -48,7 +60,7 @@ const HyperbolicRAGComponent: React.FC = () => {
     error,
     startRecording,
     stopRecording,
-  } = useSpeechToText();
+  } = useSpeechToText(handleNewTranscript);
 
   useEffect(() => {
     const getAccessToken = async () => {
@@ -67,38 +79,21 @@ const HyperbolicRAGComponent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!isRecording && !isTranscribing && transcript) {
-      setMessages((prev) => {
-        for (const msg of prev) {
-          if (msg.content === transcript) {
-        return prev;
-          }
-        }
-        return [...prev, { role: "user", content: transcript }];
-      });
-      setInput(transcript);
-      setShouldSendTranscript(true);
-    }
-  }, [isRecording, isTranscribing, transcript, setMessages, setInput]);
-
-  useEffect(() => {
     if (shouldSendTranscript && !isLoading) {
       sendMessage();
       setShouldSendTranscript(false);
+      clearInput();
     }
-  }, [shouldSendTranscript, isLoading, sendMessage]);
+  }, [shouldSendTranscript, isLoading, sendMessage, clearInput]);
 
   const handleNewVoiceMessage = useCallback(
     (newMessage: { role: "user" | "assistant"; content: string }) => {
       console.log("New voice message:", newMessage);
-
       setMessages((prevMessages) => {
-        for (const msg of prevMessages) {
-          if (msg.content === newMessage.content) {
-            return prevMessages;
-          }
+        if (!prevMessages.some((msg) => msg.content === newMessage.content)) {
+          return [...prevMessages, newMessage];
         }
-        return [...prevMessages, newMessage];
+        return prevMessages;
       });
     },
     [setMessages]
@@ -111,7 +106,13 @@ const HyperbolicRAGComponent: React.FC = () => {
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !isLoading) {
       sendMessage();
+      clearInput();
     }
+  };
+
+  const handleSendClick = () => {
+    sendMessage();
+    clearInput();
   };
 
   const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +201,7 @@ const HyperbolicRAGComponent: React.FC = () => {
           />
           <Button
             className="mx-2 p-2"
-            onClick={sendMessage}
+            onClick={handleSendClick}
             disabled={isLoading}
           >
             <ArrowRightSquareIcon />

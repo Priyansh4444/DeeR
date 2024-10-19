@@ -11,7 +11,12 @@ export const useMessages = () => {
   const sendMessage = useCallback(async () => {
     if (!input.trim()) return;
     const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => {
+      if (prev.some((msg) => msg.content === userMessage.content)) {
+      return prev;
+      }
+      return [...prev, userMessage];
+    });
     setInput("");
     setIsLoading(true);
 
@@ -55,6 +60,10 @@ export const useMessages = () => {
     }
   }, [input, messages]);
 
+  const clearInput = () => {
+    setInput("");
+  };
+
   return {
     messages,
     input,
@@ -64,5 +73,6 @@ export const useMessages = () => {
     setIsUploading,
     sendMessage,
     setMessages,
+    clearInput,
   };
 };
