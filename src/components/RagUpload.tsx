@@ -37,7 +37,6 @@ const HyperbolicRAGComponent: React.FC = () => {
   } = useMessages();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [shouldSendTranscript, setShouldSendTranscript] = useState(false);
-
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

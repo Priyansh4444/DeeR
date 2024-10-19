@@ -1,20 +1,34 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { BookOpen, MessageCircle, RotateCcw } from "lucide-react";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const TutorialStudyFeynmanTimer = () => {
   const [isStudyMode, setIsStudyMode] = useState(true);
   const [timeLeft, setTimeLeft] = useState(30);
   const [showTooltip, setShowTooltip] = useState(false);
   const [cycles, setCycles] = useState(0);
+  const emitGlowEvent = useCallback(() => {
+    const event = new CustomEvent("accessTokenButtonGlow", {
+      detail: { glow: true },
+    });
+    window.dispatchEvent(event);
 
+    // Stop the glow after 5 seconds
+    setTimeout(() => {
+      const stopEvent = new CustomEvent("accessTokenButtonGlow", {
+        detail: { glow: false },
+      });
+      window.dispatchEvent(stopEvent);
+    }, 5000);
+  }, []);
   const switchMode = useCallback(() => {
     setIsStudyMode((prevMode) => !prevMode);
     setTimeLeft(6);
     if (isStudyMode) {
       setCycles((prev) => prev + 1);
     }
+    emitGlowEvent();
   }, [isStudyMode]);
 
   useEffect(() => {
@@ -22,8 +36,8 @@ const TutorialStudyFeynmanTimer = () => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           toast({
-            title: isStudyMode ? "Study Time" : "Explanation time",
-            description: isStudyMode
+            title: !isStudyMode ? "Study Time" : "Explanation time",
+            description: !isStudyMode
               ? "Start Studying the material"
               : "Start Explaining what you have learned",
           });
