@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import {
-  createClient,
-  LiveTranscriptionEvents,
-} from "@deepgram/sdk";
-import { Button } from "@/components/ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
-const SpeechToText: React.FC = () => {
+export const useSpeechToText = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcript, setTranscript] = useState<string>("");
@@ -111,29 +106,18 @@ const SpeechToText: React.FC = () => {
     }
   }, [audioFile]);
 
-  // Auto-transcribe when recording ends
   useEffect(() => {
     if (!isRecording && audioFile) {
       streamToDeepgram();
     }
   }, [isRecording, audioFile, streamToDeepgram]);
 
-  return (
-    <div className="absolute bg-white z-20 bottom-10 left-10 h-[50vh] w-[30vw] p-4 overflow-auto">
-      <h1 className="text-2xl font-bold mb-4">
-        Audio Recorder and Transcriber
-      </h1>
-      <div className="flex space-x-2 mb-4">
-        <Button onClick={isRecording ? stopRecording : startRecording}>
-          {isRecording ? <MicOff className="mr-2" /> : <Mic className="mr-2" />}
-          {isRecording ? "Stop Recording" : "Start Recording"}
-        </Button>
-      </div>
-      {error && <p className="text-red-500 mb-2">Error: {error}</p>}
-      {isTranscribing && <p className="mb-2">Transcribing...</p>}
-      <p className="whitespace-pre-wrap">{transcript}</p>
-    </div>
-  );
+  return {
+    isRecording,
+    isTranscribing,
+    transcript,
+    error,
+    startRecording,
+    stopRecording,
+  };
 };
-
-export default SpeechToText;

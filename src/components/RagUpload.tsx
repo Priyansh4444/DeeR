@@ -16,12 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowRightSquareIcon, Mic, Upload } from "lucide-react";
+import { ArrowRightSquareIcon, Mic, MicOff, Upload } from "lucide-react";
 import { useMessages } from "./useMessages";
 import { handleFileUpload } from "./api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
 import { fetchAccessToken } from "hume";
-import SpeechToText from "./SpeechToText";
+import { useSpeechToText } from "./SpeechToText";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {
@@ -36,9 +36,19 @@ const HyperbolicRAGComponent: React.FC = () => {
   } = useMessages();
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [shouldSendTranscript, setShouldSendTranscript] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    isRecording,
+    isTranscribing,
+    transcript,
+    error,
+    startRecording,
+    stopRecording,
+  } = useSpeechToText();
 
   useEffect(() => {
     const getAccessToken = async () => {
@@ -55,6 +65,28 @@ const HyperbolicRAGComponent: React.FC = () => {
 
     getAccessToken();
   }, []);
+
+  useEffect(() => {
+    if (!isRecording && !isTranscribing && transcript) {
+      setMessages((prev) => {
+        for (const msg of prev) {
+          if (msg.content === transcript) {
+        return prev;
+          }
+        }
+        return [...prev, { role: "user", content: transcript }];
+      });
+      setInput(transcript);
+      setShouldSendTranscript(true);
+    }
+  }, [isRecording, isTranscribing, transcript, setMessages, setInput]);
+
+  useEffect(() => {
+    if (shouldSendTranscript && !isLoading) {
+      sendMessage();
+      setShouldSendTranscript(false);
+    }
+  }, [shouldSendTranscript, isLoading, sendMessage]);
 
   const handleNewVoiceMessage = useCallback(
     (newMessage: { role: "user" | "assistant"; content: string }) => {
@@ -110,6 +142,14 @@ const HyperbolicRAGComponent: React.FC = () => {
     }
   };
 
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
     <Card className="fixed z-10 top-4 right-4 w-[26rem] h-[80vh] flex flex-col">
       <CardHeader className="font-bold text-lg">Hyperbolic RAG Chat</CardHeader>
@@ -150,7 +190,7 @@ const HyperbolicRAGComponent: React.FC = () => {
         </ScrollArea>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <div className="flex w-full">
+        <div className="flex w-full items-center">
           <Input
             value={input}
             onChange={handleInputChange}
@@ -159,11 +199,18 @@ const HyperbolicRAGComponent: React.FC = () => {
             className="flex-grow mr-2"
           />
           <Button
-            className="mx-2 p-3"
+            className="mx-2 p-2"
             onClick={sendMessage}
             disabled={isLoading}
           >
             <ArrowRightSquareIcon />
+          </Button>
+          <Button
+            className="p-2"
+            onClick={toggleRecording}
+            disabled={isTranscribing}
+          >
+            {isRecording ? <MicOff /> : <Mic />}
           </Button>
           {accessToken && (
             <HumeVoiceComponent
@@ -171,23 +218,22 @@ const HyperbolicRAGComponent: React.FC = () => {
               onNewMessage={handleNewVoiceMessage}
             />
           )}
-        </div>
-        <div className="flex w-full">
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="p-2 ml-2"
+          >
+            <Upload />
+          </Button>
           <input
             type="file"
             ref={fileInputRef}
             onChange={onFileUpload}
             className="hidden"
           />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="w-full"
-          >
-            <Upload className="mr-2 h-4 w-4" /> Upload File
-          </Button>
         </div>
       </CardFooter>
+      {error && <p className="text-red-500 mt-2">Error: {error}</p>}
     </Card>
   );
 };

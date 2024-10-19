@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 import PythonWebSocketClient from "./PythonWebSocketClient";
 import { useEffect, useState } from "react";
 import HyperbolicRAGComponent from "./RagUpload";
-import SpeechToText from "./SpeechToText";
 
 // Create a wrapper component that will be dynamically imported
 const DynamicVideoCall = dynamic(
@@ -109,7 +108,6 @@ const DynamicVideoCall = dynamic(
             >
               {/* <PythonWebSocketClient data={frameData} /> */}
               <HyperbolicRAGComponent />
-              <SpeechToText />
 
               <LocalVideoTrack
                 track={localCameraTrack}
