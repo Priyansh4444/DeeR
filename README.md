@@ -3,6 +3,7 @@
 - [X] Websocket Streaming of Audio
 - [X] Add STT
 - [X] Makie it interruptable!
+- [X] Connect all the input components
 - [ ] Adding Timer Functionality
 - [ ] Adding feature of at the end of the timer being able to explain like richard feynman and get review
 - [ ] Try Make a MultiAgent Model for judging cuz Groq and Gemini!
