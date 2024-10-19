@@ -56,73 +56,73 @@ const DynamicVideoCall = dynamic(
       AppID: string;
     }) {
       const { isLoading: isLoadingMic, localMicrophoneTrack } =
-      useLocalMicrophoneTrack();
+        useLocalMicrophoneTrack();
       const [frameData, setFrameData] = useState<ArrayBuffer | null>(null);
       const { isLoading: isLoadingCam, localCameraTrack } =
-      useLocalCameraTrack();
+        useLocalCameraTrack();
       const remoteUsers = useRemoteUsers();
       const { audioTracks } = useRemoteAudioTracks(remoteUsers);
 
       usePublish([localMicrophoneTrack, localCameraTrack]);
       useJoin({
-      appid: AppID,
-      channel: channelName,
-      token: null,
+        appid: AppID,
+        channel: channelName,
+        token: null,
       });
 
       useEffect(() => {
-      audioTracks.map((track) => track.play());
+        audioTracks.map((track) => track.play());
       }, [audioTracks]);
 
       useEffect(() => {
-      if (localCameraTrack) {
-        const intervalId = setInterval(() => {
-        const frame = localCameraTrack.getCurrentFrameData();
-        console.log("Frame data:", frame);
-        setFrameData(frame.data.buffer as ArrayBuffer);
-        }, 1000); // Capture frame every second
+        if (localCameraTrack) {
+          const intervalId = setInterval(() => {
+            const frame = localCameraTrack.getCurrentFrameData();
+            console.log("Frame data:", frame);
+            setFrameData(frame.data.buffer as ArrayBuffer);
+          }, 1000); // Capture frame every second
 
-        return () => clearInterval(intervalId);
-      }
+          return () => clearInterval(intervalId);
+        }
       }, [localCameraTrack]);
 
       const unit = "minmax(0, 1fr) ";
       return (
-      <div className="flex flex-col justify-between w-full h-screen p-1">
-        {isLoadingCam || isLoadingMic ? (
-        <div>Loading devices...</div>
-        ) : (
-        <div
-          className={`grid gap-1 flex-1`}
-          style={{
-          gridTemplateColumns:
-            remoteUsers.length > 9
-            ? unit.repeat(4)
-            : remoteUsers.length > 4
-            ? unit.repeat(3)
-            : remoteUsers.length > 1
-            ? unit.repeat(2)
-            : unit,
-          }}
-        >
-          <PythonWebSocketClient data={frameData} />
-          <LocalVideoTrack
-          track={localCameraTrack}
-          play={true}
-          className="w-full h-full"
-          />
-          {remoteUsers.map((user, index) => (
-          <RemoteUser user={user} key={index} />
-          ))}
+        <div className="flex flex-col justify-between w-full h-screen p-1">
+          {isLoadingCam || isLoadingMic ? (
+            <div>Loading devices...</div>
+          ) : (
+            <div
+              className={`grid gap-1 flex-1`}
+              style={{
+                gridTemplateColumns:
+                  remoteUsers.length > 9
+                    ? unit.repeat(4)
+                    : remoteUsers.length > 4
+                    ? unit.repeat(3)
+                    : remoteUsers.length > 1
+                    ? unit.repeat(2)
+                    : unit,
+              }}
+            >
+              <PythonWebSocketClient data={frameData} />
+              <LocalVideoTrack
+                track={localCameraTrack}
+                play={true}
+                className="w-full h-full"
+              />
+              {remoteUsers.map((user, index) => (
+                <RemoteUser user={user} key={index} />
+              ))}
+            </div>
+          )}
         </div>
-        )}
-      </div>
       );
     }
 
     return VideoCallComponent;
-    },
-    {
+  },
+  {
     ssr: false, // Disable server-side rendering for this component
     loading: () => <div>Loading video call component...</div>,
   }
