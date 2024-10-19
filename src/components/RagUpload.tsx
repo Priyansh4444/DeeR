@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, {
   useState,
@@ -15,7 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload } from "lucide-react";
+import { Upload, Volume2, VolumeX } from "lucide-react";
+import Cartesia, { WebPlayer } from "@cartesia/cartesia-js";
+
 const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
 const BACKEND_URL = "http://localhost:8001"; // Updated to use port 8001
 interface Message {
@@ -91,7 +94,11 @@ const HyperbolicRAGComponent: React.FC = () => {
           messages: [
             {
               role: "system",
-              content: `Relevant context: ${relevantContext.join(". ")}`,
+              content: `Relevant context: ${relevantContext.join(
+                ". "
+              )} Your Role: You are a professional Teacher Who loves the Richard Feynman Method of learning!
+          You will be informed on what to do later on,
+          till then just help the user out with learning whatever he asks you!`,
             },
             ...messages,
             userMessage,
