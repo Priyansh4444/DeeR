@@ -43,6 +43,7 @@ export const getRelevantContext = async (query: string) => {
 export const sendMessageToAPI = async (messages: Message[], input: string) => {
   const API_KEY = process.env.NEXT_PUBLIC_HYPERBOLIC_API_KEY;
   const relevantContext = await getRelevantContext(input);
+  console.log("Relevant context:", relevantContext);
   await addToChromaDB(input);
 
   const response = await fetch(API_URL, {

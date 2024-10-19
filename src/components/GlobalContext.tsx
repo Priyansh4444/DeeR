@@ -1,8 +1,17 @@
+"use client";
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface Message {
   role: string;
   content: string;
+}
+
+interface VisionData {
+  // Define the structure of your vision data here
+  // For example:
+  emotions?: string[];
+  objects?: string[];
+  // Add more fields as needed
 }
 
 interface GlobalStateContextType {
@@ -11,6 +20,9 @@ interface GlobalStateContextType {
   chatHistory: Message[];
   addMessage: (message: Message) => void;
   ragQuery: (query: string) => Promise<string[]>;
+  visionData: VisionData | null;
+  setVisionData: (data: VisionData | null) => void;
+  setChatHistory: (history: Message[]) => void;
 }
 
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(
@@ -22,6 +34,7 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [transcript, setTranscript] = useState("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
+  const [visionData, setVisionData] = useState<VisionData | null>(null);
 
   const addMessage = useCallback((message: Message) => {
     setChatHistory((prev) => [...prev, message]);
@@ -47,6 +60,9 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
         chatHistory,
         addMessage,
         ragQuery,
+        visionData,
+        setVisionData,
+        setChatHistory,
       }}
     >
       {children}

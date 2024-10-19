@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { GlobalStateProvider } from "@/components/GlobalContext";
 
 const JetBrainsMono = localFont({
   src: "./fonts/JetBrainsMono-Regular.ttf",
@@ -21,9 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={JetBrainsMono.className + " bg-slate-900"}>
-        <main className="flex min-h-screen flex-col items-center justify-between">
-          {children}
-        </main>
+        <GlobalStateProvider>
+          <main className="flex min-h-screen flex-col items-center justify-between">
+            {children}
+          </main>
+        </GlobalStateProvider>
       </body>
     </html>
   );
