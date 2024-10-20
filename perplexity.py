@@ -49,7 +49,7 @@ def multi_model_learning_chain(concept):
 
     print("Generating simple explanation")
     simplify_prompt = f"Simplify the following analysis for easy understanding:\n\n{
-        initial_analysis}"
+        initial_analysis} with the initial analysis of {concept} as the input."
     simple_response = model.generate_content(simplify_prompt)
     print("Simple explanation generated")
 
@@ -69,7 +69,7 @@ def multi_model_learning_chain(concept):
 
     print("Generating analogies")
     analogy_prompt = f"Generate insightful analogies to explain the concept of {
-        concept} based on this analysis:\n\n{initial_analysis}"
+        concept} based on this analysis:\n\n{initial_analysis} please priotiize requests from the concept of {concept}."
     analogy_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": analogy_prompt}],
         model="llama3-8b-8192",
@@ -78,7 +78,7 @@ def multi_model_learning_chain(concept):
     print("Analogies generated")
 
     print("Generating final summary")
-    summary_prompt = f"Integrate and summarize the following information about {concept} into a comprehensive learning resource:\n\nAnalysis: {
+    summary_prompt = f"Integrate and summarize the following information about {concept}, please follow the request of {concept} into a comprehensive learning resource:\n\nAnalysis: {
         initial_analysis}\n\nSimple Explanation: {simple_explanation}\n\nFeynman Technique Explanation: {feynman_explanation}\n\nAnalogies: {analogies}"
     summary_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": summary_prompt}],
