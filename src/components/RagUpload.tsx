@@ -176,8 +176,29 @@ const HyperbolicRAGComponent: React.FC = () => {
   };
 
   return (
-    <Card className="fixed z-10 top-4 right-4 w-[26rem] h-[80vh] flex flex-col">
-      <CardHeader className="font-bold text-lg">Hyperbolic RAG Chat</CardHeader>
+    <Card className="fixed z-10 top-4 right-4 w-[28rem] h-[80vh] flex flex-col">
+      <CardHeader className="font-bold text-lg">
+        <div className="flex items-center justify-center space-x-1">
+          <span className="bg-gradient-to-r from-red-500 to-red-500 bg-clip-text text-transparent">
+            Hyperbolic
+          </span>
+          <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent">
+            ✕
+          </span>
+          <span className="bg-gradient-to-r from-yellow-500 to-green-500 bg-clip-text text-transparent">
+            Gemini
+          </span>
+          <span className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+            ✕
+          </span>
+          <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+            Groq{"  "}
+          </span>
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+            RAG Chat
+          </span>
+        </div>
+      </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           {messages.map((msg, index) => (

@@ -5,15 +5,15 @@ import { toast } from "@/hooks/use-toast";
 
 const TutorialStudyFeynmanTimer = () => {
   const [isStudyMode, setIsStudyMode] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(120); // Start with 2 minutes for study mode
   const [showTooltip, setShowTooltip] = useState(false);
   const [cycles, setCycles] = useState(0);
+
   const emitGlowEvent = useCallback(() => {
     const event = new CustomEvent("accessTokenButtonGlow", {
       detail: { glow: true },
     });
     window.dispatchEvent(event);
-
     // Stop the glow after 5 seconds
     setTimeout(() => {
       const stopEvent = new CustomEvent("accessTokenButtonGlow", {
@@ -22,9 +22,10 @@ const TutorialStudyFeynmanTimer = () => {
       window.dispatchEvent(stopEvent);
     }, 5000);
   }, []);
+
   const switchMode = useCallback(() => {
     setIsStudyMode((prevMode) => !prevMode);
-    setTimeLeft(6);
+    setTimeLeft((prevMode) => (prevMode ? 30 : 120)); // 30 seconds for explanation, 2 minutes for study
     if (isStudyMode) {
       setCycles((prev) => prev + 1);
     }
@@ -36,24 +37,30 @@ const TutorialStudyFeynmanTimer = () => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           toast({
-            title: !isStudyMode ? "Study Time" : "Explanation time",
+            title: !isStudyMode ? "Study Time" : "Explanation Time",
             description: !isStudyMode
-              ? "Start Studying the material"
-              : "Start Explaining what you have learned",
+              ? "Start studying the material (2 minutes)"
+              : "Start explaining what you have learned (30 seconds)",
           });
           switchMode();
-          return 30;
+          return isStudyMode ? 30 : 120; // Set the correct time for the next mode
         }
         return prevTime - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [switchMode]);
+  }, [switchMode, isStudyMode]);
 
   const resetTimer = () => {
     setIsStudyMode(true);
-    setTimeLeft(6);
+    setTimeLeft(120);
     setCycles(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -75,7 +82,9 @@ const TutorialStudyFeynmanTimer = () => {
           <MessageCircle className="w-5 h-5 text-green-500 dark:text-green-300" />
         )}
       </div>
-      <div className="text-sm font-mono dark:text-white mr-2">{timeLeft}s</div>
+      <div className="text-sm font-mono dark:text-white mr-2">
+        {formatTime(timeLeft)}
+      </div>
       <div className="text-xs font-mono dark:text-gray-300">
         Cycle: {cycles}
       </div>
@@ -88,7 +97,9 @@ const TutorialStudyFeynmanTimer = () => {
       </button>
       {showTooltip && (
         <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg">
-          {isStudyMode ? "Study Session (6s)" : "Feynman Technique (6s)"}
+          {isStudyMode
+            ? "Study Session (2 minutes)"
+            : "Feynman Technique (30 seconds)"}
         </div>
       )}
     </div>
