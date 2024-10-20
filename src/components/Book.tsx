@@ -231,7 +231,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     }
   });
 
-  const [_, setPage] = useAtom(pageAtom);
+  const [ setPage] = useAtom(pageAtom);
   const [highlighted, setHighlighted] = useState(false);
   useCursor(highlighted);
 

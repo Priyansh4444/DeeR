@@ -8,16 +8,6 @@ const pictures = [
   "DSC00983",
   "DSC01011",
   "DSC01040",
-  "DSC01064",
-  "DSC01071",
-  "DSC01103",
-  "DSC01145",
-  "DSC01420",
-  "DSC01461",
-  "DSC01489",
-  "DSC02031",
-  "DSC02064",
-  "DSC02069",
 ];
 
 export const pageAtom = atom(0);
@@ -40,7 +30,7 @@ pages.push({
 });
 
 export const UI = () => {
-  const [page, setPage] = useAtom(pageAtom);
+  const [page] = useAtom(pageAtom);
 
   useEffect(() => {
     const audio = new Audio("/page-flip-01a.mp3");

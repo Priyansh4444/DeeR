@@ -2,12 +2,8 @@ import {
   Environment,
   Float,
   OrbitControls,
-  PointMaterial,
-  Points,
 } from "@react-three/drei";
 import { Book } from "./Book";
-import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
 
 export const Experience = () => {
   return (
