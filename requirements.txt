@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+requests
+google-generativeai
+groq
+PyPDF2
+chromadb
+opencv-python
+numpy
+hume
+perplexity
