@@ -86,7 +86,6 @@ def multi_model_learning_chain(concept):
     )
     final_summary = summary_completion.choices[0].message.content
     print("Final summary generated")
-
     return final_summary
 
 
