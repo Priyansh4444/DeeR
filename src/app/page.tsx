@@ -33,7 +33,7 @@ export default function Home() {
       >
         <div className="bg-opacity-80 bg-brown-900 p-8 rounded-lg shadow-2xl transform perspective-1000 rotate-y-2 max-w-md w-full backdrop-blur-lg">
           <h1 className="mb-6 text-5xl font-extrabold leading-none tracking-tight text-center text-white">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-500 to-purple-600">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-orange-500 to-yellow-600">
               DeeR
             </span>
           </h1>
