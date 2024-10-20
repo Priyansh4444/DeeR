@@ -1,50 +1,118 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { Loader, PointMaterial, Points } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Suspense, useRef, useState } from "react";
+import { Experience } from "@/components/Experience";
+import { UI } from "@/components/UI";
+import * as random from "maath/random/dist/maath-random.esm";
 
 export default function Home() {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="mb-4 mt-20 text-4xl font-extrabold leading-none tracking-tight text-gray-500">
-        <span className="text-white">NextJS</span> x{" "}
-        <span className="text-blue-500">Agora</span>
-      </h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const target = e.target as typeof e.target & {
-            channel: { value: string };
-          };
-          router.push(`/channel/${target.channel.value}`);
-        }}
+    <div className="relative flex flex-col items-center justify-center w-full h-screen bg-black">
+      {/* Blurred background */}
+      <div className="absolute inset-0 backdrop-blur-3xl">
+        <Canvas shadows camera={{ position: [-0.5, 1, 4], fov: 45 }}>
+          <Stars />
+
+          <Suspense fallback={null}>
+            <Experience />
+          </Suspense>
+        </Canvas>
+        <Loader />
+      </div>
+
+      {/* Foreground form */}
+      <div
+        className={`z-10 transition-all duration-500 ease-in-out w-96 ${
+          isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        }`}
       >
-        <div className="md:flex md:items-center mt-6">
-          <div>
-            <label
-              className="block text-green-500 font-bold md:text-right mb-1 md:mb-0 pr-4"
-              htmlFor="inline-full-name"
-            >
-              Channel Name
-            </label>
-          </div>
-          <div>
-            <input
-              className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-              id="inline-full-name"
-              type="text"
-              name="channel"
-              placeholder="Enter channel name"
-              required
-            />
-          </div>
+        <div className="bg-opacity-80 bg-brown-900 p-8 rounded-lg shadow-2xl transform perspective-1000 rotate-y-2 max-w-md w-full backdrop-blur-lg">
+          <h1 className="mb-6 text-5xl font-extrabold leading-none tracking-tight text-center text-white">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-500 to-purple-600">
+              Deer
+            </span>
+          </h1>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const target = e.target as typeof e.target & {
+                channel: { value: string };
+              };
+              router.push(`/channel/${target.channel.value}`);
+            }}
+            className="flex flex-col items-center space-y-4"
+          >
+            <div className="w-full">
+              <label
+                className="block text-white font-bold mb-2"
+                htmlFor="channel-name"
+              >
+                Chapter Name
+              </label>
+              <input
+                className="bg-parchment bg-opacity-90 border-2 border-sepia rounded w-full py-2 px-4 text-brown-900 leading-tight focus:outline-none focus:border-gold"
+                id="channel-name"
+                type="text"
+                name="channel"
+                placeholder="Let's get learning peacefully"
+                required
+              />
+            </div>
+            <button className="px-6 text-white py-3 text-lg backdrop-blur-xl hover:backdrop-blur-3xl font-medium bg-opacity-90 bg-sepia rounded-lg hover:bg-gold transition duration-300 focus:ring-4 focus:ring-gold">
+              Begin Journey
+            </button>
+          </form>
         </div>
-        <div className="text-center">
-          <button className="inline-flex items-center justify-center px-5 py-3 mt-5 text-base font-medium text-center text-white bg-red-400 rounded-lg hover:bg-red-500 duration-300 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
-            Submit
-          </button>
-        </div>
-      </form>
+      </div>
+
+      {/* Button to open form */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="z-10 backdrop-blur-lg text-white hover:backdrop-blur-3xl px-6 py-3 mt-4 text-lg font-medium text-parchment bg-opacity-90 bg-sepia rounded-lg hover:bg-gold transition duration-300 focus:ring-4 focus:ring-gold"
+        >
+          Open Book
+        </button>
+      )}
+
+      <UI />
     </div>
+  );
+}
+
+function Stars(props) {
+  const ref = useRef();
+  const [sphere] = useState(() =>
+    random.inSphere(new Float32Array(3000), { radius:3 })
+  );
+
+  useFrame((state, delta) => {
+    ref.current.rotation.x -= delta / 10;
+    ref.current.rotation.y -= delta / 15;
+  });
+
+  return (
+    <group rotation={[0, 0, Math.PI / 4]}>
+      <Points
+        ref={ref}
+        positions={sphere}
+        stride={3}
+        frustumCulled={false}
+        {...props}
+      >
+        <PointMaterial
+          transparent
+          color="#ffa0e0"
+          size={0.01}
+          sizeAttenuation={true}
+          depthWrite={false}
+        />
+      </Points>
+    </group>
   );
 }
