@@ -107,7 +107,7 @@ const DynamicVideoCall = dynamic(
                     : unit,
               }}
             >
-              {/* <PythonWebSocketClient data={frameData} /> */}
+              <PythonWebSocketClient data={frameData} />
               <HyperbolicRAGComponent />
               <CompactStudyFeynmanTimer />
               <LocalVideoTrack
