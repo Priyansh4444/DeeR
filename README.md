@@ -1,6 +1,7 @@
 # ToDo
 
 - [x] Websocket Streaming of Audio
+- [x] Websocket Streaming of Vision Model
 - [x] Add STT
 - [x] Makie it interruptable!
 - [x] Connect all the input components
