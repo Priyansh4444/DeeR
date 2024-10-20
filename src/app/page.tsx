@@ -64,7 +64,7 @@ export default function Home() {
               />
             </div>
             <button className="px-6 flex flex-row align-middle items-center text-white py-3 text-lg backdrop-blur-xl hover:backdrop-blur-3xl font-medium bg-opacity-90 bg-sepia rounded-lg hover:bg-gold transition duration-300 focus:ring-4 focus:ring-gold">
-              <img src="/Logo.png"  className="h-16 w-16"/> Begin Journey
+              <img src="/Logo.png" className="h-16 w-16" /> Begin Journey
             </button>
           </form>
         </div>

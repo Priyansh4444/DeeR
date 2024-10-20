@@ -10,7 +10,36 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  @keyframes rl-loading {
+    0% {
+    }
+    20% {
+      background: white;
+      transform: scale(1.5);
+    }
+    40% {
+      background: #41f3fd;
+      transform: scale(1);
+    }
+  }
+
+  .animate-rl-loading {
+    animation: rl-loading 1.5s ease-in-out infinite;
+  }
+
+  .delay-0 {
+    animation-delay: 0s;
+  }
+
+  .delay-500 {
+    animation-delay: 0.5s;
+  }
+
+  .delay-1000 {
+    animation-delay: 1s;
+  }
 }
+
 nextjs-portal {
   display: none;
 }
@@ -78,4 +107,28 @@ nextjs-portal {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.path {
+  stroke-dasharray: var(--stroke-dasharray);
+  stroke: #ffffff;
+  animation: dash 5s linear infinite;
+  animation-delay: -1s;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 200;
+  }
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  background: #121212;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 10;
+  transform-origin: center;
 }

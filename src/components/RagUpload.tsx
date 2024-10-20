@@ -16,12 +16,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowRightSquareIcon, Mic, MicOff, Upload } from "lucide-react";
+import {
+  ArrowRightIcon,
+  ArrowRightSquareIcon,
+  Mic,
+  MicOff,
+  Upload,
+} from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { handleFileUpload } from "@/hooks/api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
 import { fetchAccessToken } from "hume";
 import { useSpeechToText } from "@/hooks/SpeechToText";
+// import LoadingAnimation from "./LoadingAnimation";
 
 const HyperbolicRAGComponent: React.FC = () => {
   const {
@@ -39,6 +46,19 @@ const HyperbolicRAGComponent: React.FC = () => {
   const [shouldSendTranscript, setShouldSendTranscript] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showPopover, setShowPopover] = useState({
+    send: false,
+    mic: false,
+    voice: false,
+    upload: false,
+  });
+
+  const togglePopover = (button: keyof typeof showPopover) => {
+    setShowPopover((prev) => ({
+      ...prev,
+      [button]: !prev[button],
+    }));
+  };
 
   const handleNewTranscript = useCallback(
     (newTranscript: string) => {
@@ -191,6 +211,7 @@ const HyperbolicRAGComponent: React.FC = () => {
               ></div>
               <span className="text-sm text-gray-500">Processing...</span>
             </div>
+            // <LoadingAnimation />
           )}
         </ScrollArea>
       </CardContent>
@@ -203,33 +224,62 @@ const HyperbolicRAGComponent: React.FC = () => {
             placeholder="Type your message..."
             className="flex-grow mr-2"
           />
-          <Button
-            className="mx-2 p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-            onClick={handleSendClick}
-            disabled={isLoading}
-          >
-            <ArrowRightSquareIcon />
-          </Button>
-          <Button
-            className="p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-            onClick={toggleRecording}
-            disabled={isTranscribing}
-          >
-            {isRecording ? <MicOff /> : <Mic />}
-          </Button>
+          <div className="relative">
+            <Button
+              className="mx-2 p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+              onClick={handleSendClick}
+              disabled={isLoading}
+              onMouseEnter={() => togglePopover("send")}
+              onMouseLeave={() => togglePopover("send")}
+            >
+              <ArrowRightIcon />
+            </Button>
+            {showPopover.send && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg">
+                Send message
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <Button
+              className="p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+              onClick={toggleRecording}
+              disabled={isTranscribing}
+              onMouseEnter={() => togglePopover("mic")}
+              onMouseLeave={() => togglePopover("mic")}
+            >
+              {isRecording ? <MicOff /> : <Mic />}
+            </Button>
+            {showPopover.mic && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg">
+                {isRecording ? "Stop recording" : "Start recording"}
+              </div>
+            )}
+          </div>
           {accessToken && (
-            <HumeVoiceComponent
-              accessToken={accessToken}
-              onNewMessage={handleNewVoiceMessage}
-            />
+            <div className="relative">
+              <HumeVoiceComponent
+                accessToken={accessToken}
+                onNewMessage={handleNewVoiceMessage}
+              />
+            </div>
           )}
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-          >
-            <Upload />
-          </Button>
+          <div className="relative">
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="p-2 animate-shimmer inline-flex items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+              onMouseEnter={() => togglePopover("upload")}
+              onMouseLeave={() => togglePopover("upload")}
+            >
+              <Upload />
+            </Button>
+            {showPopover.upload && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg">
+                Upload file
+              </div>
+            )}
+          </div>
           <input
             type="file"
             ref={fileInputRef}

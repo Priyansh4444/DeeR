@@ -25,6 +25,7 @@
     "cross-fetch": "^4.0.0",
     "dotenv": "^16.4.5",
     "formidable": "^3.5.2",
+    "framer-motion": "^11.11.9",
     "hume": "^0.9.1",
     "jotai": "^2.10.1",
     "lucide-react": "^0.453.0",
@@ -32,6 +33,7 @@
     "react": "^18",
     "react-dom": "^18",
     "reconnecting-websocket": "^4.4.0",
+    "styled-components": "^6.1.13",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "typewriter-effect": "^2.21.0"
