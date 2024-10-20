@@ -34,7 +34,7 @@ export default function Home() {
         <div className="bg-opacity-80 bg-brown-900 p-8 rounded-lg shadow-2xl transform perspective-1000 rotate-y-2 max-w-md w-full backdrop-blur-lg">
           <h1 className="mb-6 text-5xl font-extrabold leading-none tracking-tight text-center text-white">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-500 to-purple-600">
-              Deer
+              DeeR
             </span>
           </h1>
           <form
@@ -63,8 +63,8 @@ export default function Home() {
                 required
               />
             </div>
-            <button className="px-6 text-white py-3 text-lg backdrop-blur-xl hover:backdrop-blur-3xl font-medium bg-opacity-90 bg-sepia rounded-lg hover:bg-gold transition duration-300 focus:ring-4 focus:ring-gold">
-              Begin Journey
+            <button className="px-6 flex flex-row align-middle items-center text-white py-3 text-lg backdrop-blur-xl hover:backdrop-blur-3xl font-medium bg-opacity-90 bg-sepia rounded-lg hover:bg-gold transition duration-300 focus:ring-4 focus:ring-gold">
+              <img src="/Logo.png"  className="h-16 w-16"/> Begin Journey
             </button>
           </form>
         </div>
@@ -88,7 +88,7 @@ export default function Home() {
 function Stars(props) {
   const ref = useRef();
   const [sphere] = useState(() =>
-    random.inSphere(new Float32Array(3000), { radius:3 })
+    random.inSphere(new Float32Array(3000), { radius: 3 })
   );
 
   useFrame((state, delta) => {
