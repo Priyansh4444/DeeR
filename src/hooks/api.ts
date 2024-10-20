@@ -1,7 +1,6 @@
 import { Message } from "./types";
 import Cartesia, { WebPlayer } from "@cartesia/cartesia-js";
 
-const API_URL = "https://api.hyperbolic.xyz/v1/chat/completions";
 const BACKEND_URL = "http://localhost:8001";
 const CARTESIA_API_KEY =
   process.env.NEXT_PUBLIC_CARTESIA_API_KEY || "your-cartesia-api-key";
@@ -29,6 +28,7 @@ export const getRelevantContext = async (query: string) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${CARTESIA_API_KEY}`,
       },
       body: JSON.stringify({ query }),
     });
@@ -41,17 +41,16 @@ export const getRelevantContext = async (query: string) => {
 };
 
 export const sendMessageToAPI = async (messages: Message[], input: string) => {
-  const API_KEY = process.env.NEXT_PUBLIC_HYPERBOLIC_API_KEY;
   const relevantContext = await getRelevantContext(input);
   console.log("Relevant context:", relevantContext);
   await addToChromaDB(input);
 
-  const response = await fetch(API_URL, {
+  const response = await fetch(`${BACKEND_URL}/generate-summary`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
     },
+
     body: JSON.stringify({
       messages: [
         {
@@ -65,15 +64,20 @@ export const sendMessageToAPI = async (messages: Message[], input: string) => {
         ...messages,
         { role: "user", content: input },
       ],
-      model: "meta-llama/Meta-Llama-3.1-405B-Instruct",
-      max_tokens: 2048,
-      temperature: 0.7,
-      top_p: 0.9,
-      stream: true,
     }),
   });
 
-  return response;
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data.status === "success") {
+    return data.summary;
+  } else {
+    throw new Error(data.message || "Failed to generate summary");
+  }
 };
 
 export const handleFileUpload = async (file: File) => {
@@ -101,6 +105,7 @@ export const playAudioMessage = async (text: string) => {
     encoding: "pcm_f32le",
     sampleRate: 44100,
   });
+  console.log("Wensocket:", websocket);
 
   try {
     await websocket.connect();

@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+"use client";
+import { useState, useCallback } from "react";
 import { Message } from "./types";
 import { sendMessageToAPI, addToChromaDB, playAudioMessage } from "./api";
 import { useGlobalState } from "../components/GlobalContext";
@@ -25,38 +26,17 @@ export const useMessages = () => {
 
     try {
       const response = await sendMessageToAPI(messages, input);
-      const reader = response.body?.getReader();
-      const assistantMessage: Message = { role: "assistant", content: "" };
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = new TextDecoder().decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const jsonString = line.slice(6);
-              if (jsonString.trim() === "[DONE]") break;
-
-              try {
-                const jsonData = JSON.parse(jsonString);
-                const content = jsonData.choices[0]?.delta?.content || "";
-                assistantMessage.content += content;
-              } catch (error) {
-                console.error("Error parsing JSON:", error);
-              }
-            }
-          }
-        }
-      }
+      console.log("Response:", response);
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: response,
+      };
+      console.log("Assistant message:", assistantMessage);
 
       await addToChromaDB(assistantMessage.content);
       setMessages((prev) => [...prev, assistantMessage]);
       setChatHistory((prev: any) => [...prev, assistantMessage]);
-
+      console.log("Assistant message:", assistantMessage.content);
       playAudioMessage(assistantMessage.content);
     } catch (error) {
       console.error("Error sending message:", error);

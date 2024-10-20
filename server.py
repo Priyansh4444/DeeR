@@ -1,6 +1,8 @@
+from functools import lru_cache
 import io
+from typing import List
 from PyPDF2 import PdfReader
-from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, UploadFile, File, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import chromadb
@@ -213,23 +215,39 @@ def process_emotions(emotions):
     return []
 
 
+class Message(BaseModel):
+    role: str
+    content: str
+
+
+class SummaryRequest(BaseModel):
+    messages: List[Message]
+
+
 @app.post("/generate-summary")
-async def generate_summary(item: QueryItem):
+async def generate_summary(request: SummaryRequest):
     try:
-        results = collection.query(
-            query_texts=[item.query],
-            n_results=5
-        )
-        if results['documents']:
-            content = results['documents'][0] + " " + item.query
-            summary = multi_model_learning_chain(content)
-            return {"status": "success", "summary": summary}
-        else:
-            return {"status": "error", "message": "No results found"}
+        # Extract the user's input (last message in the list)
+        user_input = request.messages[-1].content
+
+        # Extract the relevant context from the system message
+        system_message = next(
+            (msg for msg in request.messages if msg.role == "system"), None)
+        relevant_context = system_message.content if system_message else ""
+
+        # Combine relevant context, message history, and user input
+        full_context = f"{relevant_context}\n\nConversation history:\n"
+        # Exclude system message and last user message
+        for msg in request.messages[1:-1]:
+            full_context += f"{msg.role.capitalize()}: {msg.content}\n"
+        full_context += f"\nUser's question: {user_input}"
+
+        # Generate summary using the multi-model learning chain
+        summary = multi_model_learning_chain(full_context)
+
+        return {"status": "success", "summary": summary}
     except Exception as e:
         logging.error(f"Error generating summary: {str(e)}")
-        return {"status": "error", "message": str(e)}
-
-
+        raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)
