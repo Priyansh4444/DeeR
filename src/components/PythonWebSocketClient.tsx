@@ -50,7 +50,8 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
           }
         }
         setMessage((prevMessage) => {
-          if (!prevMessage || !prevMessage.emotions || !response.emotions) return response;
+          if (!prevMessage || !prevMessage.emotions || !response.emotions)
+            return response;
           return {
             ...response,
             emotions: response.emotions.map((emotion: Emotion) => ({
@@ -135,7 +136,6 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
         {message?.face_detected !== undefined && (
           <p className="mt-2 text-sm">
             Face detected: {message.face_detected ? "Yes" : "No"}
-
             {message.face_probability &&
               ` (${(message.face_probability * 100).toFixed(1)}%)`}
           </p>

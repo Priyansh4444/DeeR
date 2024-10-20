@@ -35,7 +35,7 @@ export const useMessages = () => {
 
       await addToChromaDB(assistantMessage.content);
       setMessages((prev) => [...prev, assistantMessage]);
-    setChatHistory((prev: any) => [...prev, assistantMessage]);
+      setChatHistory((prev: any) => [...prev, assistantMessage]);
       console.log("Assistant message:", assistantMessage.content);
       playAudioMessage(assistantMessage.content);
     } catch (error) {
