@@ -7,11 +7,8 @@ interface Message {
 }
 
 interface VisionData {
-  // Define the structure of your vision data here
-  // For example:
   emotions?: string[];
   objects?: string[];
-  // Add more fields as needed
 }
 
 interface GlobalStateContextType {
@@ -41,8 +38,7 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const ragQuery = useCallback(async (query: string): Promise<string[]> => {
-    // Implement your RAG query logic here
-    // This is a placeholder implementation
+    // get rag query for voice model before starting feynman method
     const response = await fetch("/api/query-chroma", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

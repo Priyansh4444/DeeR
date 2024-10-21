@@ -16,11 +16,11 @@ interface HumeResponse {
   error?: string;
 }
 
-interface PythonWebSocketClientProps {
+interface EmotionalAnalysisProps {
   data: ArrayBuffer | null;
 }
 
-const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
+const EmotionalAnalysis = ({ data }: EmotionalAnalysisProps) => {
   const [message, setMessage] = useState<HumeResponse | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -41,7 +41,7 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
       try {
         const response = JSON.parse(event.data);
         if (response.emotions) {
-          if (response.emotions[2].score * 100 > 35) {
+          if (response.emotions[2].score * 100 > 50) {
             toast({
               title: "Emotion Detected",
               description: "You Seem Distressed Consider taking a break!",
@@ -57,7 +57,7 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
             emotions: response.emotions.map((emotion: Emotion) => ({
               ...emotion,
               score:
-                0.9 * emotion.score +
+                0.7 * emotion.score +
                 0.3 *
                   (prevMessage.emotions!.find((e) => e.name === emotion.name)
                     ?.score || 0),
@@ -145,4 +145,4 @@ const PythonWebSocketClient = ({ data }: PythonWebSocketClientProps) => {
   );
 };
 
-export default PythonWebSocketClient;
+export default EmotionalAnalysis;

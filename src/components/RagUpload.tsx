@@ -16,23 +16,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  ArrowRightIcon,
-  ArrowRightSquareIcon,
-  CheckCircle,
-  Mic,
-  MicOff,
-  Upload,
-} from "lucide-react";
+import { ArrowRightIcon, CheckCircle, Mic, MicOff, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useMessages } from "@/hooks/useMessages";
 import { handleFileUpload } from "@/hooks/api";
 import { HumeVoiceComponent } from "./HumeVoiceComponent";
 import { fetchAccessToken } from "hume";
 import { useSpeechToText } from "@/hooks/SpeechToText";
-// import LoadingAnimation from "./LoadingAnimation";
 
-const WorkflowStep = ({ number, title, description, delay }) => {
+const WorkflowStep = ({
+  number,
+  title,
+  description,
+  delay,
+}: {
+  number: number;
+  title: string;
+  description: string;
+  delay: number;
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -98,7 +100,7 @@ const WorkflowGuide = () => {
         className="mt-8 text-center text-green-500"
       >
         <CheckCircle className="inline-block mr-2" />
-        <span>You're on your way to Next.js mastery!</span>
+        <span>You&apos;re on your way to Next.js mastery!</span>
       </motion.div>
     </div>
   );
@@ -151,14 +153,8 @@ const HyperbolicRAGComponent: React.FC = () => {
     [setMessages, setInput]
   );
 
-  const {
-    isRecording,
-    isTranscribing,
-    transcript,
-    error,
-    startRecording,
-    stopRecording,
-  } = useSpeechToText(handleNewTranscript);
+  const { isRecording, isTranscribing, error, startRecording, stopRecording } =
+    useSpeechToText(handleNewTranscript);
 
   useEffect(() => {
     const getAccessToken = async () => {
@@ -308,7 +304,6 @@ const HyperbolicRAGComponent: React.FC = () => {
                 ></div>
                 <span className="text-sm text-gray-500">Processing...</span>
               </div>
-              // <LoadingAnimation />
             )}
           </ScrollArea>
         </CardContent>
@@ -357,7 +352,12 @@ const HyperbolicRAGComponent: React.FC = () => {
               <div className="relative">
                 <HumeVoiceComponent
                   accessToken={accessToken}
-                  onNewMessage={handleNewVoiceMessage}
+                  onNewMessage={
+                    handleNewVoiceMessage as (message: {
+                      role: string;
+                      content: string;
+                    }) => void
+                  }
                 />
               </div>
             )}
@@ -397,7 +397,6 @@ const HyperbolicRAGComponent: React.FC = () => {
         >
           <WorkflowGuide />
         </motion.div>
-
       )}
     </>
   );

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useVoice, VoiceReadyState } from "@humeai/voice-react";
 import { Button } from "./ui/button";
 import { FireExtinguisher, FlameKindling, BrainCircuit } from "lucide-react";
-
 interface ControlsProps {
   onButtonPress: () => void;
 }

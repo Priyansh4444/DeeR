@@ -1,11 +1,17 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Loader, PointMaterial, Points } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, PointsProps, useFrame } from "@react-three/fiber";
 import { Suspense, useRef, useState } from "react";
 import { Experience } from "@/components/Experience";
 import { UI } from "@/components/UI";
+// @ts-expect-error - no types available
 import * as random from "maath/random/dist/maath-random.esm";
+import {
+  BufferGeometry,
+  Material,
+  Points as ThreePoints,
+} from "three/src/Three.js";
 
 export default function Home() {
   const router = useRouter();
@@ -84,16 +90,16 @@ export default function Home() {
     </div>
   );
 }
-
-function Stars(props) {
-  const ref = useRef();
+type PointsInstance = ThreePoints<BufferGeometry, Material | Material[]>;
+function Stars(props: PointsProps) {
+  const ref = useRef<PointsInstance | null>(null);
   const [sphere] = useState(() =>
     random.inSphere(new Float32Array(3000), { radius: 3 })
   );
 
   useFrame((state, delta) => {
-    ref.current.rotation.x -= delta / 10;
-    ref.current.rotation.y -= delta / 15;
+    ref.current!.rotation.x -= delta / 10;
+    ref.current!.rotation.y -= delta / 15;
   });
 
   return (

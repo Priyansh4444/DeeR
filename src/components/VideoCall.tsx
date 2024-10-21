@@ -3,7 +3,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import PythonWebSocketClient from "./PythonWebSocketClient";
+import EmotionalAnalysis from "./EmotionalAnalysis";
 import { useEffect, useState } from "react";
 import HyperbolicRAGComponent from "./RagUpload";
 import CompactStudyFeynmanTimer from "./Timer";
@@ -107,7 +107,7 @@ const DynamicVideoCall = dynamic(
                     : unit,
               }}
             >
-              <PythonWebSocketClient data={frameData} />
+              <EmotionalAnalysis data={frameData} />
               <HyperbolicRAGComponent />
               <CompactStudyFeynmanTimer />
               <LocalVideoTrack
