@@ -2,12 +2,11 @@
 
 ![DeeR Logo](public/DeeR.png)
 
-[![Cal Hacks 11.0 Winner](https://img.shields.io/badge/Cal%20Hacks%2011.0-Winner-gold)]
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)]
-[![Next.js](https://img.shields.io/badge/Next.js-14.0%2B-black)]
+![Cal Hacks 11.0 Winner](https://img.shields.io/badge/Cal%20Hacks%2011.0-Winner-gold)
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Next.js](https://img.shields.io/badge/Next.js-14.0%2B-black)
 
 [Watch Demo Video](https://youtu.be/1LN9q6boel8) | [DevPost](https://devpost.com/software/deer)
-
 
 ## About DeeR
 
@@ -56,6 +55,8 @@ npm run dev        # Frontend
 ## The Team
 
 DeeR was developed as a solo project by me🦌, a Computer Science student at UCI, during Cal Hacks 11.0. This project represents a fusion of personal experience with academic challenges and a desire to create meaningful solutions for students worldwide.
+
+I would also like to thank HealthyGamerGG, since without their inspiration I couldn't come up with this idea and I would also be stuck in that Negative Feedback Loop!
 
 ## Acknowledgments
 
