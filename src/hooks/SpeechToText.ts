@@ -42,6 +42,7 @@ export const useSpeechToText = (
 
       mediaRecorder.start();
       setIsRecording(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setError(err.message);
@@ -83,7 +84,7 @@ export const useSpeechToText = (
             connection.finish();
             return;
           }
-          connection.send(value);
+          connection.send(value.buffer);
           pump();
         };
         pump();
@@ -108,6 +109,7 @@ export const useSpeechToText = (
         }
         clearAllState();
       });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setError(err.message);

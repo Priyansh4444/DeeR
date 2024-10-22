@@ -109,7 +109,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
   const manualSkinnedMesh = useMemo(() => {
     const bones = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
-      let bone = new Bone();
+      const bone = new Bone();
       bones.push(bone);
       if (i === 0) {
         bone.position.x = 0;

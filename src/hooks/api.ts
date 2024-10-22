@@ -105,7 +105,6 @@ export const playAudioMessage = async (text: string) => {
     encoding: "pcm_f32le",
     sampleRate: 44100,
   });
-  console.log("Wensocket:", websocket);
 
   try {
     await websocket.connect();
